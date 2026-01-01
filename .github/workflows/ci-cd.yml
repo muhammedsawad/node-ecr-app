@@ -48,31 +48,21 @@ jobs:
       - name: Build Docker image
         run: |
           docker build \
-            -t ${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} \
-            -t ${{ secrets.ECR_REPOSITORY }}:latest \
-            .
+            -t ${{ vars.ECR_REGISTRY }}/${{ vars.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} \
+            -t ${{ vars.ECR_REGISTRY }}/${{ vars.ECR_REPOSITORY }}:latest .
 
-      # 8. 🔐 Trivy vulnerability scan (BLOCK on HIGH/CRITICAL)
-      # - name: Trivy Image Scan
-      #   uses: aquasecurity/trivy-action@v0
-      #   with:
-      #     image-ref: ${{ secrets.ECR_REPOSITORY }}:latest
-      #     severity: CRITICAL,HIGH
-      #     exit-code: 1
-      #     ignore-unfixed: true
-      #     vuln-type: os,library
+      # 8. Trivy vulnerability scan (BLOCK on HIGH/CRITICAL)
+      - name: Trivy Image Scan
+        uses: aquasecurity/trivy-action@v0
+        with:
+          image-ref: ${{ vars.ECR_REGISTRY }}/${{ vars.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          severity: CRITICAL,HIGH
+          exit-code: 1
+          ignore-unfixed: true
+          vuln-type: os,library
 
-      # 9. Tag Docker image for ECR
-      - name: Tag Docker image
-        run: |
-          docker tag ${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }} \
-            ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-
-          docker tag ${{ secrets.ECR_REPOSITORY }}:latest \
-            ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
-
-      # 10. Push image to ECR
+      # 9. Push image to ECR
       - name: Push Docker image
         run: |
-          docker push ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
-          docker push ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:latest
+          docker push ${{ vars.ECR_REGISTRY }}/${{ vars.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}
+          docker push ${{ vars.ECR_REGISTRY }}/${{ vars.ECR_REPOSITORY }}:latest
