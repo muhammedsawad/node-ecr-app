@@ -54,7 +54,7 @@ jobs:
 
       # 8. 🔐 Trivy vulnerability scan (BLOCK on HIGH/CRITICAL)
       - name: Trivy Image Scan
-        uses: aquasecurity/trivy-action@v0.24.0
+        uses: aquasecurity/trivy-action@v0
         with:
           image-ref: ${{ secrets.ECR_REPOSITORY }}:latest
           severity: CRITICAL,HIGH
